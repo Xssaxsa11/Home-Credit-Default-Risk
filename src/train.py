@@ -5,10 +5,13 @@ from sklearn.metrics import roc_auc_score
 from src.preprocessing import prepare_features
 from src.model import make_catboost
 import json
+from pathlib import Path
 
 def main():
-    raw_df = pd.read_csv('data/application_train.csv')
+    Path('artifacts').mkdir(exist_ok=True)
 
+    raw_df = pd.read_csv('data/application_train.csv')
+    
     y = raw_df['TARGET']
     X = raw_df.drop(columns=['TARGET', 'SK_ID_CURR'])
 

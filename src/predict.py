@@ -25,10 +25,23 @@ model.load_model('artifacts/catboost.cbm')
 
 scores = model.predict_proba(X)[:, 1]
 
+threshold = 0.41
+predictions = (scores >=threshold).astype(int)
+
+# results['distance'] = abs(results[results['prediction'] == 0]['risk_scores'] - threshold)
+
 results = pd.DataFrame({
     'SK_ID_CURR' : df['SK_ID_CURR'].to_numpy(),
-    'risk_scores' : scores
+    'risk_scores' : scores,
+    'predictions' : predictions
 })
+results['distance'] = abs(results[results['predictions'] == 0]['risk_scores'] - threshold)
+n_review = int(np.ceil(len(results) * 0.10))
+
+review_idx = results.nsmallest(n_review, 'distance').index
+
+results['need_review'] = False
+results.loc[review_idx, 'need_review'] = True
 
 results = results.sort_values('risk_scores', ascending=False)
 

@@ -11,19 +11,20 @@ def load_artefacts(art_dir):
     model.load_model(os.path.join(art_dir, 'catboost.cbm'))
 
     with open(os.path.join(art_dir, 'schema.json'), 'r', encoding='utf-8') as file:
-            data = json.load(file)
+            schema = json.load(file)
 
-    return model, data        
+    return model, schema
 
-def predict(df, model, schema, threshold = 0.5):
+def predict(df, model, schema):
     feature_cols = schema['feature_columns'] 
     categorical_cols = schema['categorical_columns']
-     
+    threshold = schema['threshold']
+    
     required_cols = set(feature_cols) | {'SK_ID_CURR'}
     missing_cols = required_cols - set(df.columns)
 
     if missing_cols:
-            raise ValueError(f'Не хватает колонок: {missing_cols}')
+            raise ValueError(f'Missed required cols: {missing_cols}')
     
     X = prepare_features(df, feature_cols, categorical_cols)
 
@@ -40,8 +41,7 @@ def predict(df, model, schema, threshold = 0.5):
     n_review = int(np.ceil(len(results) * 0.10))
 
     review_idx = results.sort_values(by=['predictions', 'distance']).iloc[:n_review].index
-    # review_idx = results.nsmallest(n_review, 'distance').index
-    
+        
     results['need_review'] = False
     results.loc[review_idx, 'need_review'] = True
     
@@ -55,15 +55,15 @@ def main():
 
     df = pd.read_csv('data/sample_inputs.csv')
 
-    predictions = predict(df, model, schema, 0.41)
+    predictions = predict(df, model, schema)
 
     path = Path('reports')
     path.mkdir(parents=True, exist_ok=True)
 
     predictions.to_csv(path / 'predictions.csv', index=False)
 
-    print(f'Обработано заявок: {len(predictions)}')
-    print('Результат сохранён в reports/predictions.csv')
+    print(f'Processed application: {len(predictions)}')
+    print('Result was saved in reports/predictions.csv')
     
     
 

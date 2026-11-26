@@ -138,5 +138,6 @@
     "HOUSETYPE_MODE",
     "WALLSMATERIAL_MODE",
     "EMERGENCYSTATE_MODE"
-  ]
+  ],
+  "threshold": 0.4
 }

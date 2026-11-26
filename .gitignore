@@ -1,4 +1,7 @@
-data/
-src/__pycache__/
+data/*
+!data/sample_inputs.csv
+__pycache__/
 catboost_info/
 .ipynb_checkpoints/
+.venv/
+.pytest_cache/
